@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoQuota — Landing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f6fbf6;
+            --surface: #ffffff;
+            --text: #1b281d;
+            --muted: #607063;
+            --line: #d8e8db;
+            --green: #1e8e4b;
+            --green-soft: #eaf8ee;
+            --green-2: #2cae62;
+            --font-ui: "Manrope", "Segoe UI", Roboto, Arial, sans-serif;
+            --font-logo: "Space Grotesk", "Manrope", sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: var(--font-ui);
+            color: var(--text);
+            background:
+                radial-gradient(900px 520px at 10% -15%, #dff5e6 0%, transparent 60%),
+                radial-gradient(800px 500px at 100% 0%, #e8f8ec 0%, transparent 52%),
+                var(--bg);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .floating-orb {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(1px);
+            animation: float 7s ease-in-out infinite;
+            opacity: 0.55;
+        }
+
+        .orb-a {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #d8f4e0, #bce7ca);
+            top: 12%;
+            left: -50px;
+        }
+
+        .orb-b {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #e8f8ec, #cdeed9);
+            right: -70px;
+            top: 18%;
+            animation-delay: 1.2s;
+        }
+
+        .orb-c {
+            width: 110px;
+            height: 110px;
+            background: linear-gradient(135deg, #ecfaf0, #d4f1de);
+            left: 14%;
+            bottom: 16%;
+            animation-delay: 2.1s;
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 34px 18px 48px;
+        }
+
+        .hero {
+            min-height: calc(100vh - 82px);
+            display: grid;
+            align-items: center;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 24px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            background: rgba(255,255,255,0.88);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 8px 14px;
+            backdrop-filter: blur(6px);
+        }
+
+        .brand img {
+            height: 34px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .brand span {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #2a5535;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: var(--font-logo);
+            font-size: clamp(2.1rem, 4vw, 3.4rem);
+            line-height: 1.03;
+            letter-spacing: -0.035em;
+        }
+
+        .subtitle {
+            margin: 16px 0 0;
+            color: var(--muted);
+            max-width: 620px;
+            line-height: 1.7;
+            font-size: 1.04rem;
+        }
+
+        .cta-wrap {
+            margin-top: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 194px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(90deg, var(--green), var(--green-2));
+            font-weight: 800;
+            box-shadow: 0 14px 30px rgba(30, 142, 75, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 34px rgba(30, 142, 75, 0.26);
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: 0 16px 40px rgba(23, 78, 42, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(46, 174, 98, 0.08), transparent 45%);
+            pointer-events: none;
+        }
+
+        .panel h2 {
+            margin: 0 0 14px;
+            font-family: var(--font-logo);
+            letter-spacing: -0.02em;
+            font-size: 1.2rem;
+        }
+
+        .schema {
+            position: relative;
+            display: grid;
+            gap: 12px;
+            z-index: 1;
+        }
+
+        .node {
+            border: 1px solid #d4e8d9;
+            background: #fbfffc;
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.93rem;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .node:nth-child(2) { animation-delay: 0.6s; }
+        .node:nth-child(3) { animation-delay: 1.2s; }
+        .node:nth-child(4) { animation-delay: 1.7s; }
+
+        .token-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #d5e8da;
+            background: var(--green-soft);
+            border-radius: 999px;
+            padding: 5px 9px;
+            color: #20683b;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .token-pill img {
+            width: 15px;
+            height: 15px;
+            object-fit: contain;
+        }
+
+        .kpis {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+            gap: 10px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .kpi {
+            border: 1px solid #d8e9dc;
+            background: #f9fdf9;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .kpi strong {
+            display: block;
+            font-family: var(--font-logo);
+            font-size: 1.05rem;
+        }
+
+        .kpi span {
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .strip {
+            margin-top: 20px;
+            background: #ffffff;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+            gap: 10px;
+        }
+
+        .strip-item {
+            border: 1px solid #d9e9dc;
+            background: #f8fdf8;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 0.86rem;
+            color: #33533a;
+        }
+
+        @keyframes float {
+            0%,100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(44,174,98,0.0); }
+            50% { box-shadow: 0 0 0 6px rgba(44,174,98,0.08); }
+        }
+
+        #splash {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" stroke-width="0.5" stroke="%232cae62" fill="none"><path d="M100 900 Q200 800, 300 900 T500 900, 700 900, 900 900"/><path d="M100 100 Q300 200, 500 100 T900 100"/><circle cx="500" cy="500" r="400"/></svg>');
+            background-size: cover;
+            background-position: center;
+            /* Animation d'apparition globale du fond */
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        /* --- 2. LOGO GÉANT CENTRAL --- */
+        .splash-token-large {
+            width: 35vh; 
+            height: auto;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 20px 30px rgba(30,142,75,0.25));
+            /* Il démarre petit et invisible, puis grossit */
+            opacity: 0;
+            transform: scale(0.5) rotate(-10deg);
+            animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s forwards;
+        }
+
+        .splash-logo-large {
+            width: 800px;     /* On passe de 500px à 800px pour qu'il soit massif */
+            max-width: 90vw;  /* Il pourra prendre jusqu'à 90% de la largeur de l'écran */
+            height: auto;
+            position: relative;
+            z-index: 2;
+            filter: drop-shadow(0 20px 30px rgba(30,142,75,0.15));
+            opacity: 0;
+            transform: scale(0.6);
+            animation: popInLogo 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s forwards;
+        }
+
+        /* --- 3. PIÈCES VOLANTES --- */
+        .splash-token-scatter {
+            width: 10vh;
+            position: absolute;
+            z-index: 1;
+            filter: drop-shadow(0 8px 12px rgba(30,142,75,0.15));
+            opacity: 0;
+            animation: fadeIn 1s ease 0.8s forwards; /* Apparaissent après le gros logo */
+        }
+        .token1 { top: 15vh; left: 10vw; transform: rotate(15deg); }
+        .token2 { top: 75vh; right: 15vw; transform: rotate(-25deg); }
+        .token3 { bottom: 20vh; left: 25vw; transform: rotate(5deg); }
+        .token4 { top: 40vh; right: 5vw; transform: rotate(40deg); }
+
+        /* --- 4. INCITATION AU SCROLL --- */
+        .scroll-prompt {
+            position: absolute;
+            bottom: 3vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--green);
+            font-family: var(--font-logo);
+            font-weight: 700;
+            gap: 10px;
+            opacity: 0;
+            /* Combine l'apparition et le rebond */
+            animation: fadeIn 1s ease 1.2s forwards, bounce 2s infinite 2.2s;
+        }
+        .scroll-prompt svg { width: 32px; height: 32px; }
+
+        @keyframes popInLogo {
+            to { opacity: 1; transform: scale(1); } /* Le logo s'affiche droit, sans rotation */
+        }
+
+        /* --- KEYFRAMES --- */
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        @keyframes popIn {
+            to { opacity: 1; transform: scale(1) rotate(-10deg); }
+        }
+        @keyframes bounce { 
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* --- MEDIA QUERIES --- */
+        @media (max-width: 980px) {
+            .hero { grid-template-columns: 1fr; min-height: unset; }
+            .kpis, .strip { grid-template-columns: 1fr; }
+            .panel { margin-top: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="splash">
+        <img src="assets/Logo_baniere.png" alt="Grand jeton carbone" class="splash-logo-large">
+        
+        <img src="assets/CreditCarbone.png" alt="Jeton carbone" class="splash-token-scatter token1">
+        <img src="assets/CreditCarbone.png" alt="Jeton carbone" class="splash-token-scatter token2">
+        <img src="assets/CreditCarbone.png" alt="Jeton carbone" class="splash-token-scatter token3">
+        <img src="assets/CreditCarbone.png" alt="Jeton carbone" class="splash-token-scatter token4">
+
+        <div class="scroll-prompt">
+            <span>DÉCOUVRIR LE PROJET</span>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </div>
+    </div>
+    <div class="floating-orb orb-a"></div>
+    <div class="floating-orb orb-b"></div>
+    <div class="floating-orb orb-c"></div>
+
+    <main class="wrap">
+        <section class="hero">
+            <article>
+                <div class="brand">
+                    <img src="assets/Logo_baniere.png" alt="Logo projet">
+                    <span>Plateforme Carbone Entreprise</span>
+                </div>
+                <h1>Transformez vos actions écologiques en crédits carbone traçables</h1>
+                <p class="subtitle">
+                    La plateforme permet aux entreprises de piloter des quotas annuels, de valider des actions terrain via la DAO,
+                    puis de compenser l’empreinte carbone avec un jeton dédié.
+                </p>
+
+                <div class="cta-wrap">
+                    <a class="cta" href="portail.html">Accéder</a>
+                    <span class="hint">Connexion MetaMask sur l’étape suivante</span>
+                </div>
+
+                <div class="strip">
+                    <div class="strip-item">Validation collective des actions</div>
+                    <div class="strip-item">Récompense en jetons carbone</div>
+                    <div class="strip-item">Compensation vérifiable on-chain</div>
+                </div>
+            </article>
+
+            <aside class="panel" aria-label="Schéma de fonctionnement">
+                <h2>Schéma du cycle carbone</h2>
+                <div class="schema">
+                    <div class="node">
+                        <span>1. Employé soumet une preuve</span>
+                        <span class="token-pill"><img src="assets/CreditCarbone.png" alt="Token">Proof</span>
+                    </div>
+                    <div class="node">
+                        <span>2. Vote DAO (pour / contre)</span>
+                        <span class="token-pill"><img src="assets/CreditCarbone.png" alt="Token">Vote</span>
+                    </div>
+                    <div class="node">
+                        <span>3. Action validée → mint ECO</span>
+                        <span class="token-pill"><img src="assets/CreditCarbone.png" alt="Token">+ ECO</span>
+                    </div>
+                    <div class="node">
+                        <span>4. Compensation empreinte → burn ECO</span>
+                        <span class="token-pill"><img src="assets/CreditCarbone.png" alt="Token">Burn</span>
+                    </div>
+                </div>
+
+                <div class="kpis">
+                    <div class="kpi">
+                        <strong>DAO</strong>
+                        <span>Gouvernance interne</span>
+                    </div>
+                    <div class="kpi">
+                        <strong>ECO</strong>
+                        <span>Jeton carbone</span>
+                    </div>
+                    <div class="kpi">
+                        <strong>Quota</strong>
+                        <span>Réduction annuelle</span>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
+    <script>
+        const mainContent = document.querySelector('.wrap');
+        const scrollPrompt = document.querySelector('.scroll-prompt');
+        let isAutoScrolling = false;
+
+        // Fonction mathématique pour un effet d'accélération/décélération très doux (Easing)
+        function easeInOutQuad(t, b, c, d) {
+            t /= d / 2;
+            if (t < 1) return c / 2 * t * t + b;
+            t--;
+            return -c / 2 * (t * (t - 2) - 1) + b;
+        }
+
+        // Fonction d'animation personnalisée du scroll
+        function scrollToContent(duration) {
+            const startPosition = window.scrollY;
+            const targetPosition = mainContent.getBoundingClientRect().top + window.scrollY;
+            const distance = targetPosition - startPosition;
+            let startTime = null;
+
+            function animation(currentTime) {
+                if (startTime === null) startTime = currentTime;
+                const timeElapsed = currentTime - startTime;
+                
+                // Calcule la position avec la courbe de douceur
+                const run = easeInOutQuad(timeElapsed, startPosition, distance, duration);
+                window.scrollTo(0, run);
+                
+                if (timeElapsed < duration) {
+                    requestAnimationFrame(animation); // Continue l'animation
+                } else {
+                    isAutoScrolling = false; // Libère la molette à la fin
+                }
+            }
+            requestAnimationFrame(animation);
+        }
+
+        // 1. Déclenchement à la molette
+        window.addEventListener('wheel', (e) => {
+            // On s'active si on est tout en haut (à 5px près) et qu'on descend
+            if (window.scrollY <= 5 && e.deltaY > 0) {
+                e.preventDefault(); // Bloque le scroll brutal du navigateur
+                if (!isAutoScrolling) {
+                    isAutoScrolling = true;
+                    scrollToContent(1200); // Durée réglée sur 1.2s (modifie 1200 si besoin)
+                }
+            }
+        }, { passive: false });
+
+        // 2. Déclenchement au clic sur "DÉCOUVRIR LE PROJET"
+        scrollPrompt.addEventListener('click', () => {
+            if (!isAutoScrolling) {
+                isAutoScrolling = true;
+                scrollToContent(1200);
+            }
+        });
+    </script>
+</body>
+</html>

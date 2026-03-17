@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Employé</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #f6faf6;
+            --card: #ffffff;
+            --text: #1e2b1f;
+            --muted: #5f6f60;
+            --line: #dce8dd;
+            --green: #1f8f4a;
+            --green-2: #24a85a;
+            --danger: #d64545;
+            --font-ui: "Manrope", "Segoe UI", Roboto, Arial, sans-serif;
+            --font-logo: "Space Grotesk", "Manrope", sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: var(--font-ui);
+            background: radial-gradient(circle at top, #f0f8f0 0%, var(--bg) 55%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        #login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            padding: 44px 34px;
+            box-shadow: 0 16px 40px rgba(31, 143, 74, 0.08);
+            text-align: center;
+        }
+
+        .denied-card {
+            width: 100%;
+            max-width: 500px;
+            background: #ffffff;
+            border: 1px solid #f0d5d5;
+            border-radius: 24px;
+            padding: 42px 34px;
+            box-shadow: 0 18px 44px rgba(145, 38, 38, 0.08);
+            text-align: center;
+        }
+
+        .denied-icon {
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            border: 1px solid #efc0c0;
+            background: #fff7f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--danger);
+        }
+
+        .denied-icon svg {
+            width: 42px;
+            height: 42px;
+            fill: currentColor;
+        }
+
+        .denied-card h2 {
+            margin: 0 0 10px;
+            font-family: var(--font-logo);
+            font-size: 1.6rem;
+            letter-spacing: -0.03em;
+            color: #2d2424;
+        }
+
+        .denied-card p {
+            margin: 0;
+            color: #6f5858;
+            line-height: 1.55;
+        }
+
+        .denied-actions {
+            margin-top: 22px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .project-logo-login {
+            width: min(280px, 72%);
+            display: block;
+            margin: 0 auto 20px;
+            object-fit: contain;
+        }
+
+        .login-card h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-family: var(--font-logo);
+            letter-spacing: -0.04em;
+        }
+
+        .login-card p {
+            margin: 12px 0 28px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .btn-metamask {
+            width: 100%;
+            border: 1px solid #f2d7bf;
+            border-radius: 14px;
+            background: #fff;
+            color: #312f2e;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 14px 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-metamask:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(246, 133, 27, 0.18);
+        }
+
+        .btn-metamask img { width: 30px; height: 30px; }
+
+        .small-link {
+            display: inline-block;
+            margin-top: 16px;
+            color: var(--green);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        #app { display: none; }
+
+        #denied-screen {
+            min-height: 100vh;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 6vw;
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-logo);
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -0.03em;
+        }
+
+        .brand-logo {
+            height: 42px;
+            width: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        .wallet {
+            font-family: var(--font-ui);
+            background: #eff7f0;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            font-weight: 700;
+        }
+
+        .wallet:hover {
+            transform: translateY(-1px);
+            border-color: #bdd7c0;
+            box-shadow: 0 10px 22px rgba(31, 143, 74, 0.08);
+        }
+
+        .layout {
+            max-width: 1100px;
+            margin: 28px auto;
+            padding: 0 16px;
+            display: grid;
+            gap: 18px;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 20px;
+        }
+
+        .card h2 {
+            margin: 0 0 16px;
+            font-size: 1.05rem;
+            font-family: var(--font-logo);
+            letter-spacing: -0.02em;
+        }
+
+        .stats {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .stat {
+            background: #f3faf4;
+            border: 1px solid #deebdf;
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        .label { color: var(--muted); font-size: 0.82rem; }
+        .value { margin-top: 6px; font-weight: 700; font-size: 1.15rem; }
+
+        .value,
+        .profile-stat-value,
+        .profile-avatar,
+        .avatar {
+            font-family: var(--font-logo);
+        }
+
+        .token-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .token-mark {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+
+        .token-mark.sm {
+            width: 16px;
+            height: 16px;
+        }
+
+        .token-mark.lg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .field { margin-bottom: 10px; }
+        .field label { display: block; font-size: 0.9rem; margin-bottom: 6px; color: #324533; }
+        .field input, .field textarea, .field select {
+            width: 100%;
+            border: 1px solid #cfe0d0;
+            border-radius: 12px;
+            padding: 11px 12px;
+            font: inherit;
+            background: #fff;
+        }
+
+        .field textarea { resize: vertical; min-height: 90px; }
+
+        .btn {
+            border: 0;
+            background: linear-gradient(90deg, var(--green), var(--green-2));
+            color: #fff;
+            padding: 11px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
+        }
+
+        .btn.secondary {
+            background: #fff;
+            border: 1px solid var(--line);
+            color: var(--text);
+            margin-top: 8px;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--muted);
+            min-height: 20px;
+        }
+
+        .status.error { color: var(--danger); }
+        .status.success { color: var(--green); }
+
+        .actions-list {
+            display: grid;
+            gap: 14px;
+            max-height: 520px;
+            overflow: auto;
+            padding-right: 4px;
+            scroll-behavior: smooth;
+        }
+
+        .actions-list::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .actions-list::-webkit-scrollbar-thumb {
+            background: #d5e6d7;
+            border-radius: 999px;
+        }
+
+        .action-item {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px;
+            background: #fcfffc;
+            font-size: 0.92rem;
+            box-shadow: 0 10px 24px rgba(31, 143, 74, 0.05);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .action-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(31, 143, 74, 0.08);
+            border-color: #c7ddc9;
+        }
+
+        .action-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .action-head-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .avatar {
+            width: 46px;
+            height: 46px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #dff5e3, #bfe8c9);
+            border: 1px solid #cbe3cf;
+            color: #1f7b43;
+            font-weight: 800;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        .action-title-wrap {
+            min-width: 0;
+        }
+
+        .action-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-date {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .action-meta {
+            display: grid;
+            gap: 6px;
+            color: #314233;
+        }
+
+        .badges-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .vote-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid #dbe9dd;
+            background: #f6fbf6;
+        }
+
+        .vote-badge svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+        }
+
+        .vote-badge.up {
+            color: var(--green);
+            background: #effaf1;
+            border-color: #cde7d3;
+        }
+
+        .vote-badge.down {
+            color: var(--danger);
+            background: #fff3f3;
+            border-color: #f0d1d1;
+        }
+
+        .action-proof {
+            background: #f5faf5;
+            border: 1px solid #e2eee3;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-top: 10px;
+            color: #476049;
+            word-break: break-word;
+        }
+
+        .feed-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .vote-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .vote-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid #d5e5d7;
+            border-radius: 50%;
+            background: #fff;
+            color: #5c6d5e;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: transform 0.18s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .vote-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 10px 20px rgba(31, 143, 74, 0.1);
+        }
+
+        .vote-btn:hover svg {
+            transform: scale(1.08);
+        }
+
+        .vote-btn:active,
+        .vote-btn.pop {
+            animation: votePop 0.35s ease;
+        }
+
+        .vote-btn.is-up {
+            background: #ebfaef;
+            border-color: #9fd6ae;
+            color: var(--green);
+            box-shadow: 0 8px 18px rgba(31, 143, 74, 0.18);
+        }
+
+        .vote-btn.is-down {
+            background: #fff0f0;
+            border-color: #efb3b3;
+            color: var(--danger);
+            box-shadow: 0 8px 18px rgba(214, 69, 69, 0.14);
+        }
+
+        .vote-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .vote-btn.loading {
+            color: transparent;
+            position: relative;
+        }
+
+        .vote-btn.loading svg {
+            opacity: 0;
+        }
+
+        .vote-btn.loading::after {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(31, 143, 74, 0.22);
+            border-top-color: var(--green);
+            position: absolute;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .vote-btn.loading.is-down::after {
+            border: 2px solid rgba(214, 69, 69, 0.2);
+            border-top-color: var(--danger);
+        }
+
+        .feed-card {
+            grid-column: 1 / -1;
+        }
+
+        .feed-card h2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feed-note {
+            font-size: 0.84rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(18, 34, 21, 0.34);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+            backdrop-filter: blur(6px);
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .profile-modal {
+            width: 100%;
+            max-width: 520px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: 0 24px 60px rgba(19, 54, 28, 0.18);
+            padding: 22px;
+            animation: modalIn 0.22s ease;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .profile-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d8f2de, #b9e8c5);
+            color: #1e7f44;
+            border: 1px solid #c9e3cf;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .profile-subtitle {
+            color: var(--muted);
+            font-size: 0.88rem;
+            margin-top: 4px;
+        }
+
+        .close-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--line);
+            background: #fff;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #506251;
+        }
+
+        .profile-wallet {
+            background: #f5faf5;
+            border: 1px solid #dfebdf;
+            border-radius: 14px;
+            padding: 12px;
+            font-family: var(--font-ui);
+            color: #305234;
+            margin-bottom: 14px;
+            word-break: break-all;
+            font-weight: 700;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .profile-stat {
+            border: 1px solid #deebdf;
+            background: #f7fcf7;
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .profile-stat-value {
+            margin-top: 8px;
+            font-size: 1.32rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-footnote {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes votePop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            margin-left: 6px;
+            border: 1px solid #cee3cf;
+            background: #f2fbf3;
+            color: #1b6b38;
+        }
+
+        @media (max-width: 930px) {
+            .layout { grid-template-columns: 1fr; }
+            .profile-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <section id="login-screen">
+        <div class="login-card">
+            <img class="project-logo-login" src="assets/Logo_baniere.png" alt="Logo du projet">
+            <h1>Portail carbone</h1>
+            <p>Plateforme de crédits carbone de l’entreprise. Connecte ton wallet pour proposer et voter des actions écologiques.</p>
+            <button class="btn-metamask" onclick="connect()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask Logo">
+                Se connecter avec MetaMask
+            </button>
+            <div id="login-status" class="status"></div>
+        </div>
+    </section>
+
+    <section id="denied-screen">
+        <div class="denied-card">
+            <div class="denied-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7a1 1 0 1 0-1.4 1.4l4.9 4.9-4.9 4.9a1 1 0 1 0 1.4 1.4l4.9-4.9 4.9 4.9a1 1 0 0 0 1.4-1.4l-4.9-4.9 4.9-4.9a1 1 0 0 0 0-1.4Z"/>
+                </svg>
+            </div>
+            <h2>Accès refusé</h2>
+            <p>Ce portail est réservé au compte entreprise. Le wallet connecté ne possède pas les autorisations requises pour afficher le dashboard.</p>
+            <div id="denied-status" class="status error" style="text-align:center;"></div>
+            <div class="denied-actions">
+                <button class="btn secondary" style="width:auto; margin:0;" onclick="disconnect()">Changer de compte</button>
+            </div>
+        </div>
+    </section>
+
+    <main id="app">
+        <header class="topbar">
+            <div class="brand">
+                <img class="brand-logo" src="assets/Logo_baniere.png" alt="Logo du projet">
+                <span>Portail Employé</span>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button id="wallet" class="wallet" onclick="openProfileModal()" title="Voir le profil">0x...</button>
+                <button class="btn secondary" style="width:auto; margin:0;" onclick="disconnect()">Déconnexion</button>
+            </div>
+        </header>
+
+        <section class="layout">
+            <article class="card">
+                <h2>Vue d’ensemble DAO</h2>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="label">Année actuelle</div>
+                        <div id="year-value" class="value">-</div>
+                    </div>
+                    <div class="stat">
+                        <div class="label">Quota carbone</div>
+                        <div class="value token-inline"><img class="token-mark lg" src="assets/CreditCarbone.png" alt="CreditCarbone"><span id="quota-value">-</span></div>
+                    </div>
+                    <div class="stat">
+                        <div class="label">Actions soumises</div>
+                        <div id="actions-count-value" class="value">-</div>
+                    </div>
+                    <div class="stat">
+                        <div class="label">Mes crédits ECO</div>
+                        <div class="value token-inline"><img class="token-mark lg" src="assets/CreditCarbone.png" alt="CreditCarbone"><span id="eco-balance-value">-</span></div>
+                    </div>
+                </div>
+                <div id="employee-tag" class="status"></div>
+            </article>
+
+            <article class="card">
+                <h2>Soumettre une action écologique</h2>
+                <div class="field">
+                    <label for="proof-hash">Preuve (IPFS hash / URL / référence)</label>
+                    <textarea id="proof-hash" placeholder="Ex: ipfs://Qm... ou lien de preuve"></textarea>
+                </div>
+                <button class="btn" onclick="submitAction()">Soumettre</button>
+                <div id="submit-status" class="status"></div>
+            </article>
+
+            <article class="card feed-card">
+                <h2>
+                    <span>Dernières actions</span>
+                    <span class="feed-note">Fil d’actu scrollable • vote direct depuis chaque carte</span>
+                </h2>
+                <div id="actions-list" class="actions-list"></div>
+                <div id="vote-status" class="status"></div>
+                <button class="btn secondary" onclick="refreshAll()">Rafraîchir</button>
+            </article>
+        </section>
+    </main>
+
+    <div id="profile-overlay" class="modal-overlay" onclick="closeProfileModal(event)">
+        <div class="profile-modal" onclick="event.stopPropagation()">
+            <div class="profile-header">
+                <div class="profile-header-left">
+                    <div id="profile-avatar" class="profile-avatar">--</div>
+                    <div>
+                        <strong>Mon compte entreprise</strong>
+                        <div id="profile-subtitle" class="profile-subtitle">Chargement du profil...</div>
+                    </div>
+                </div>
+                <button class="close-btn" onclick="closeProfileModal()" aria-label="Fermer la fenêtre de profil">✕</button>
+            </div>
+
+            <div id="profile-wallet" class="profile-wallet">0x...</div>
+
+            <div class="profile-grid">
+                <div class="profile-stat">
+                    <div class="label">Actions soumises</div>
+                    <div id="profile-submitted" class="profile-stat-value">-</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="label">Actions validées sur l’année</div>
+                    <div id="profile-validated" class="profile-stat-value">-</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="label">Votes déjà participés</div>
+                    <div id="profile-votes" class="profile-stat-value">-</div>
+                </div>
+                <div class="profile-stat">
+                    <div class="label">Solde ECO</div>
+                    <div id="profile-balance" class="profile-stat-value"><img class="token-mark lg" src="assets/CreditCarbone.png" alt="CreditCarbone"><span id="profile-balance-text">-</span></div>
+                </div>
+            </div>
+
+            <div id="profile-footnote" class="profile-footnote">Les statistiques sont calculées à partir des actions du contrat actuellement chargé.</div>
+        </div>
+    </div>
+
+    <script>
+        const contractAddress = "0xA9f004584b8531adB51C912E4A1dD8be88Ff7254";
+
+        const daoAbi = [
+            "function owner() view returns (address)",
+            "function anneeActuelle() view returns (uint256)",
+            "function quotaActuel() view returns (uint256)",
+            "function actionCount() view returns (uint256)",
+            "function token() view returns (address)",
+            "function isEmploye(address) view returns (bool)",
+            "function aVote(uint256,address) view returns (bool)",
+            "function soumettreAction(string calldata _preuveHash)",
+            "function voter(uint256 _actionId, bool _choix)",
+            "function actions(uint256) view returns (uint256 id, address auteur, string preuveHash, uint256 votesPour, uint256 votesContre, bool estValidee)"
+        ];
+
+        const tokenAbi = [
+            "function balanceOf(address account) view returns (uint256)"
+        ];
+
+        let provider;
+        let signer;
+        let dao;
+        let token;
+        let userAddress;
+        let cachedProfileStats = null;
+
+        function voteStorageKey(actionId) {
+            return `green-vote:${contractAddress}:${userAddress || "anonymous"}:${actionId}`;
+        }
+
+        function getStoredVoteChoice(actionId) {
+            return localStorage.getItem(voteStorageKey(actionId));
+        }
+
+        function storeVoteChoice(actionId, choice) {
+            localStorage.setItem(voteStorageKey(actionId), choice);
+        }
+
+        function firstSeenStorageKey(actionId) {
+            return `green-action-first-seen:${contractAddress}:${actionId}`;
+        }
+
+        function getOrCreateFirstSeen(actionId) {
+            const key = firstSeenStorageKey(actionId);
+            let value = localStorage.getItem(key);
+            if (!value) {
+                value = String(Date.now() - (Number(actionId) * 60000));
+                localStorage.setItem(key, value);
+            }
+            return Number(value);
+        }
+
+        function formatRelativeTime(timestamp) {
+            const seconds = Math.max(1, Math.floor((Date.now() - timestamp) / 1000));
+            if (seconds < 60) return `il y a ${seconds} sec`;
+
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `il y a ${minutes} min`;
+
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `il y a ${hours} h`;
+
+            const days = Math.floor(hours / 24);
+            return `il y a ${days} j`;
+        }
+
+        function getAuthorAvatar(address) {
+            return `${address.slice(2, 4).toUpperCase()}`;
+        }
+
+        function shortAddress(address) {
+            return `${address.slice(0, 6)}...${address.slice(-4)}`;
+        }
+
+        function thumbIcon(direction) {
+            if (direction === "down") {
+                return `
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M10 21h1.4c.7 0 1.3-.4 1.6-1l3.1-6.6c.2-.3.2-.7.2-1.1V5.5C16.3 4.1 15.2 3 13.8 3H7.2c-1 0-1.8.6-2.2 1.5L2.2 11c-.1.3-.2.7-.2 1v.5C2 13.9 3.1 15 4.5 15H9v4c0 1.1.9 2 2 2Zm8-18h2c1.1 0 2 .9 2 2v8c0 1.1-.9 2-2 2h-2V3Z"/>
+                    </svg>
+                `;
+            }
+
+            return `
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14 3h-1.4c-.7 0-1.3.4-1.6 1l-3.1 6.6c-.2.3-.2.7-.2 1.1v6.8c0 1.4 1.1 2.5 2.5 2.5h6.6c1 0 1.8-.6 2.2-1.5l2.8-6.5c.1-.3.2-.7.2-1v-.5c0-1.4-1.1-2.5-2.5-2.5H15V5c0-1.1-.9-2-2-2ZM4 9H2c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h2V9Z"/>
+                </svg>
+            `;
+        }
+
+        function setStatus(id, message, type = "") {
+            const node = document.getElementById(id);
+            node.className = `status ${type}`.trim();
+            node.textContent = message;
+        }
+
+        function setProfileValue(id, value) {
+            document.getElementById(id).textContent = value;
+        }
+
+        function setProfileBalanceValue(value) {
+            document.getElementById("profile-balance-text").textContent = value;
+        }
+
+        async function connect() {
+            if (!window.ethereum) {
+                setStatus("login-status", "MetaMask non détecté.", "error");
+                return;
+            }
+
+            try {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                dao = new ethers.Contract(contractAddress, daoAbi, signer);
+
+                const [ownerAddress, isEmployee] = await Promise.all([
+                    dao.owner(),
+                    dao.isEmploye(userAddress)
+                ]);
+
+                document.getElementById("wallet").textContent = shortAddress(userAddress);
+                document.getElementById("login-screen").style.display = "none";
+
+                if (userAddress.toLowerCase() === ownerAddress.toLowerCase()) {
+                    window.location.href = "admin.html";
+                    return;
+                }
+
+                if (!isEmployee) {
+                    document.getElementById("app").style.display = "none";
+                    document.getElementById("denied-screen").style.display = "flex";
+                    setStatus("denied-status", "Ce wallet n’est associé à aucun portail autorisé.", "error");
+                    return;
+                }
+
+                const tokenAddress = await dao.token();
+                token = new ethers.Contract(tokenAddress, tokenAbi, signer);
+                document.getElementById("denied-screen").style.display = "none";
+                document.getElementById("app").style.display = "block";
+
+                await refreshAll();
+            } catch (error) {
+                setStatus("login-status", "Connexion annulée ou configuration invalide.", "error");
+                console.error(error);
+            }
+        }
+
+        async function refreshAll() {
+            if (!dao || !token) return;
+            try {
+                const [year, quota, count, employee, rawBalance] = await Promise.all([
+                    dao.anneeActuelle(),
+                    dao.quotaActuel(),
+                    dao.actionCount(),
+                    dao.isEmploye(userAddress),
+                    token.balanceOf(userAddress)
+                ]);
+
+                document.getElementById("year-value").textContent = year.toString();
+                document.getElementById("quota-value").textContent = quota.toString();
+                document.getElementById("actions-count-value").textContent = count.toString();
+                document.getElementById("eco-balance-value").textContent = ethers.utils.formatUnits(rawBalance, 18);
+                setStatus("employee-tag", employee ? "Tu es whitelisté en tant qu’employé." : "Tu n’es pas whitelisté. Contacte l’owner.", employee ? "success" : "error");
+                cachedProfileStats = null;
+
+                await loadActions(Number(count));
+            } catch (error) {
+                setStatus("employee-tag", "Impossible de charger les données du contrat.", "error");
+                console.error(error);
+            }
+        }
+
+        async function loadActions(count) {
+            const list = document.getElementById("actions-list");
+            list.innerHTML = "";
+
+            if (!count) {
+                list.innerHTML = '<div class="action-item">Aucune action soumise pour le moment.</div>';
+                return;
+            }
+
+            const start = Math.max(1, count - 9);
+            for (let id = count; id >= start; id--) {
+                try {
+                    const [action, hasVoted] = await Promise.all([
+                        dao.actions(id),
+                        dao.aVote(id, userAddress)
+                    ]);
+
+                    const storedChoice = getStoredVoteChoice(id);
+                    const firstSeen = getOrCreateFirstSeen(id);
+                    const relativeTime = formatRelativeTime(firstSeen);
+                    const avatar = getAuthorAvatar(action.auteur);
+                    const proof = action.preuveHash && action.preuveHash.length > 70
+                        ? `${action.preuveHash.slice(0, 70)}...`
+                        : action.preuveHash;
+
+                    const upClass = storedChoice === "pour" ? "is-up" : "";
+                    const downClass = storedChoice === "contre" ? "is-down" : "";
+                    const disabledAttr = hasVoted || action.estValidee ? "disabled" : "";
+
+                    const html = `
+                        <div class="action-item">
+                            <div class="action-head">
+                                <div class="action-head-left">
+                                    <div class="avatar">${avatar}</div>
+                                    <div class="action-title-wrap">
+                                        <div class="action-title-row">
+                                            <strong>Action #${action.id.toString()}</strong>
+                                            <span class="pill">${action.estValidee ? "Validée" : "En cours"}</span>
+                                        </div>
+                                        <div class="action-date">${relativeTime}</div>
+                                    </div>
+                                </div>
+                                <div class="label">${hasVoted ? "Vote enregistré" : "Vote ouvert"}</div>
+                            </div>
+
+                            <div class="action-meta">
+                                <div><strong>Auteur :</strong> ${shortAddress(action.auteur)}</div>
+                                <div class="badges-row">
+                                    <span class="vote-badge up">${thumbIcon("up")} ${action.votesPour.toString()} pour</span>
+                                    <span class="vote-badge down">${thumbIcon("down")} ${action.votesContre.toString()} contre</span>
+                                </div>
+                            </div>
+
+                            <div class="action-proof"><strong>Preuve :</strong> ${proof || "-"}</div>
+
+                            <div class="feed-actions">
+                                <div class="vote-group">
+                                    <button class="vote-btn ${upClass}" ${disabledAttr} onclick="voteFromFeed(${action.id.toString()}, true, this)" aria-label="Voter pour l'action ${action.id.toString()}">${thumbIcon("up")}</button>
+                                    <button class="vote-btn ${downClass}" ${disabledAttr} onclick="voteFromFeed(${action.id.toString()}, false, this)" aria-label="Voter contre l'action ${action.id.toString()}">${thumbIcon("down")}</button>
+                                </div>
+                                <div class="label">${action.estValidee ? "Action récompensée" : hasVoted ? "Tu as déjà voté" : "Choisis un pouce pour voter"}</div>
+                            </div>
+                        </div>
+                    `;
+                    list.insertAdjacentHTML("beforeend", html);
+                } catch (error) {
+                    console.error(`Erreur lecture action ${id}`, error);
+                }
+            }
+        }
+
+        async function submitAction() {
+            const proof = document.getElementById("proof-hash").value.trim();
+            if (!proof) {
+                setStatus("submit-status", "Ajoute une preuve avant d’envoyer.", "error");
+                return;
+            }
+
+            try {
+                setStatus("submit-status", "Transaction en cours...", "");
+                const tx = await dao.soumettreAction(proof);
+                await tx.wait();
+                setStatus("submit-status", "Action soumise avec succès.", "success");
+                document.getElementById("proof-hash").value = "";
+                await refreshAll();
+            } catch (error) {
+                setStatus("submit-status", "Échec de soumission. Vérifie whitelist et wallet.", "error");
+                console.error(error);
+            }
+        }
+
+        async function voteAction(actionId, choice) {
+            try {
+                setStatus("vote-status", "Vote en cours...", "");
+                const tx = await dao.voter(actionId, choice);
+                await tx.wait();
+                storeVoteChoice(actionId, choice ? "pour" : "contre");
+                cachedProfileStats = null;
+                setStatus("vote-status", "Vote confirmé sur la blockchain.", "success");
+                await refreshAll();
+                return true;
+            } catch (error) {
+                setStatus("vote-status", "Impossible de voter (déjà voté, non employé ou action invalidée).", "error");
+                console.error(error);
+                return false;
+            }
+        }
+
+        async function computeProfileStats() {
+            if (!dao || !token || !userAddress) return null;
+            if (cachedProfileStats) return cachedProfileStats;
+
+            const [countBn, yearBn, balanceBn, isEmployee] = await Promise.all([
+                dao.actionCount(),
+                dao.anneeActuelle(),
+                token.balanceOf(userAddress),
+                dao.isEmploye(userAddress)
+            ]);
+
+            const count = Number(countBn);
+            let submitted = 0;
+            let validated = 0;
+            let votes = 0;
+
+            const ids = Array.from({ length: count }, (_, index) => index + 1);
+            const actionReads = ids.map((id) => dao.actions(id));
+            const voteReads = ids.map((id) => dao.aVote(id, userAddress));
+            const [actionsData, votesData] = await Promise.all([
+                Promise.all(actionReads),
+                Promise.all(voteReads)
+            ]);
+
+            actionsData.forEach((action, index) => {
+                if (action.auteur.toLowerCase() === userAddress.toLowerCase()) {
+                    submitted += 1;
+                    if (action.estValidee) {
+                        validated += 1;
+                    }
+                }
+
+                if (votesData[index]) {
+                    votes += 1;
+                }
+            });
+
+            cachedProfileStats = {
+                year: yearBn.toString(),
+                submitted,
+                validated,
+                votes,
+                isEmployee,
+                balance: ethers.utils.formatUnits(balanceBn, 18)
+            };
+
+            return cachedProfileStats;
+        }
+
+        async function openProfileModal() {
+            if (!userAddress) return;
+
+            document.getElementById("profile-overlay").classList.add("open");
+            document.getElementById("profile-avatar").textContent = getAuthorAvatar(userAddress);
+            document.getElementById("profile-wallet").textContent = userAddress;
+            document.getElementById("profile-subtitle").textContent = "Chargement des statistiques...";
+            setProfileValue("profile-submitted", "...");
+            setProfileValue("profile-validated", "...");
+            setProfileValue("profile-votes", "...");
+            setProfileBalanceValue("...");
+
+            try {
+                const stats = await computeProfileStats();
+                if (!stats) return;
+
+                document.getElementById("profile-subtitle").textContent = stats.isEmployee
+                    ? `Employé autorisé • Année ${stats.year}`
+                    : `Compte non whitelisté • Année ${stats.year}`;
+                setProfileValue("profile-submitted", String(stats.submitted));
+                setProfileValue("profile-validated", String(stats.validated));
+                setProfileValue("profile-votes", String(stats.votes));
+                setProfileBalanceValue(stats.balance);
+                document.getElementById("profile-footnote").textContent = `Les actions validées sont calculées sur l’année DAO ${stats.year} à partir des actions présentes dans ce contrat.`;
+            } catch (error) {
+                document.getElementById("profile-subtitle").textContent = "Impossible de charger le profil";
+                document.getElementById("profile-footnote").textContent = "Erreur de lecture des statistiques du profil.";
+                console.error(error);
+            }
+        }
+
+        function closeProfileModal(event) {
+            if (event && event.target && event.target.id !== "profile-overlay") return;
+            document.getElementById("profile-overlay").classList.remove("open");
+        }
+
+        async function voteFromFeed(actionId, choice, button) {
+            if (!button) return;
+
+            const wrapper = button.closest(".vote-group");
+            const buttons = wrapper ? wrapper.querySelectorAll(".vote-btn") : [];
+            const otherButton = wrapper
+                ? wrapper.querySelector(choice ? 'button[onclick*="false"]' : 'button[onclick*="true"]')
+                : null;
+
+            buttons.forEach((btn) => {
+                btn.disabled = true;
+                btn.classList.remove("pop", "loading");
+            });
+
+            button.classList.add("pop");
+            if (choice) {
+                button.classList.add("is-up");
+                if (buttons[1]) buttons[1].classList.remove("is-down");
+            } else {
+                button.classList.add("is-down");
+                if (buttons[0]) buttons[0].classList.remove("is-up");
+            }
+
+            button.classList.add("loading");
+            if (otherButton) {
+                otherButton.classList.remove("loading");
+            }
+
+            const success = await voteAction(actionId, choice);
+            if (!success) {
+                buttons.forEach((btn) => {
+                    btn.disabled = false;
+                    btn.classList.remove("is-up", "is-down", "pop", "loading");
+                });
+            } else {
+                buttons.forEach((btn) => {
+                    btn.classList.remove("loading");
+                });
+            }
+        }
+
+        function disconnect() {
+            provider = null;
+            signer = null;
+            dao = null;
+            token = null;
+            userAddress = null;
+            cachedProfileStats = null;
+
+            document.getElementById("app").style.display = "none";
+            document.getElementById("denied-screen").style.display = "none";
+            document.getElementById("login-screen").style.display = "flex";
+            document.getElementById("profile-overlay").classList.remove("open");
+            setStatus("login-status", "Déconnecté.", "");
+        }
+    </script>
+</body>
+</html>
