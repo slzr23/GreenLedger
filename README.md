@@ -1,6 +1,6 @@
 # GreenLedger
 
-Plateforme Web3 de suivi d’actions écologiques en entreprise, avec gouvernance interne et système de crédits carbone (`ECO`) sur Ethereum.
+Plateforme de suivi d’actions écologiques en entreprise, avec gouvernance interne et système de crédits carbone (`ECO`) sur Ethereum.
 
 ![Logo GreenLedger](front/assets/Logo_baniere.png)
 
