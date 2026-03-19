@@ -129,6 +129,27 @@ Bien que le flux principal soit sécurisé, un déploiement sur le réseau princ
 * **Risque de collusion (Seuils codés en dur) :** Le seuil de validation est fixé à 3 votes. Si l'entreprise grandit et compte 500 employés, un groupe de 3 personnes malveillantes pourrait s'entendre pour valider de fausses preuves et générer des jetons à l'infini. *Solution prévue : Remplacer le seuil fixe par un quorum dynamique (ex: nécessiter le vote favorable de 10 % des employés inscrits).*
 * **Risque théorique de Réentrance :** Bien que l'ordre des instructions dans la fonction `compenserEmpreinte` protège globalement contre les attaques par réentrance, l'utilisation de `.call{value: ...}("")` sans garde explicite reste une pratique auditable. *Solution prévue : Implémenter le modificateur `nonReentrant` (ReentrancyGuard d'OpenZeppelin) sur toutes les fonctions manipulant de l'Ether.*
 
+### Perspectives d'évolution et Déploiement Public
+
+Ce projet constitue une solide preuve de concept (PoC) démontrant la viabilité d'un système de quota carbone interne basé sur la blockchain. Cependant, pour passer d'un environnement local à une application prête pour la production, plusieurs évolutions techniques et fonctionnelles sont envisageables.
+
+**Améliorations fonctionnelles et techniques**
+
+* **Quorum de vote dynamique :** Le système actuel valide une action après 3 votes favorables. Pour une mise à l'échelle, ce seuil fixe devrait être remplacé par un pourcentage dynamique (par exemple, 10 % du nombre total d'employés inscrits dans le contrat) afin de s'adapter à la taille de l'entreprise.
+* **Stockage natif IPFS :** Actuellement, l'utilisateur doit fournir un lien ou un hash de preuve. L'intégration d'un SDK Web3 (comme Pinata ou nft.storage) directement dans le frontend permettrait le téléchargement de fichiers (photos, documents PDF) depuis l'interface, avec une génération automatique du hash IPFS stocké ensuite sur la blockchain.
+* **Indexation et lecture des événements :** Le frontend boucle actuellement sur les identifiants d'actions pour générer le fil d'actualité. Pour des raisons de performance et de coûts de requêtes (RPC calls), il est recommandé de migrer vers une écoute active des événements du contrat (via Ethers.js) ou d'utiliser un protocole d'indexation décentralisé comme The Graph.
+* **Gouvernance décentralisée de l'administration :** Le remplacement du compte administrateur unique par un portefeuille multisignature (MultiSig) sécuriserait les actions critiques, telles que l'ajout de nouveaux employés ou le déclenchement des compensations financières.
+
+**Feuille de route pour un déploiement sur une Blockchain Publique**
+
+Passer de l'environnement de développement local (Ganache) à un réseau public de test (Testnet comme Sepolia) ou principal (Mainnet comme Ethereum ou Base) nécessite les étapes suivantes :
+
+1.  **Configuration d'un nœud RPC :** La blockchain locale n'existant plus, il faut s'appuyer sur un fournisseur d'infrastructure Web3 (comme Alchemy ou Infura) pour obtenir une URL de point de terminaison (endpoint) permettant au frontend et aux scripts de déploiement de communiquer avec le réseau public.
+2.  **Configuration des outils de déploiement :** Les frameworks de développement (Hardhat, Foundry ou Truffle) doivent être reconfigurés avec l'URL du nœud RPC et la clé privée du portefeuille administrateur chargé du déploiement.
+3.  **Approvisionnement en frais de gaz :** Le déploiement de contrats sur un réseau public a un coût. Pour un Testnet, il faut réclamer des jetons gratuits via un "Faucet". Pour un Mainnet, il faut approvisionner le portefeuille de déploiement avec la cryptomonnaie native du réseau (ex: ETH).
+4.  **Vérification du code source :** Une fois les contrats déployés, leur code source doit être publié et vérifié sur l'explorateur de blocs correspondant (comme Etherscan). Cela permet à quiconque de lire le code publiquement et d'interagir avec lui depuis l'explorateur, garantissant ainsi une transparence totale.
+5.  **Mise à jour du Frontend :** Les adresses de contrats codées en dur dans les fichiers `admin.html` et `portail.html` doivent être remplacées par les nouvelles adresses publiques. Le frontend devra également vérifier que le réseau détecté dans MetaMask (le Chain ID) correspond bien au réseau de production choisi.
+
 ## Remarques
 
 - Les montants de token sont exprimés en base `18 decimals` côté contrat.
