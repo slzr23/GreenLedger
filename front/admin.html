@@ -54,6 +54,10 @@
             display: block;
         }
 
+        .title-home {
+            display: block;
+        }
+
         .title h1 {
             margin: 0;
             font-size: 1.65rem;
@@ -214,7 +218,9 @@
 <body>
     <header class="header">
         <div class="title">
-            <img class="title-logo" src="assets/Logo_baniere.png" alt="Logo du projet">
+            <a class="title-home" href="index.html" aria-label="Retour à l'accueil">
+                <img class="title-logo" src="assets/Logo_baniere.png" alt="Logo du projet">
+            </a>
             <div>
                 <h1>Portail Admin</h1>
                 <p>Panneau propriétaire pour gérer les employés, quotas annuels et compensation carbone.</p>
@@ -292,7 +298,7 @@
     </section>
 
     <script>
-        const contractAddress = "0xA9f004584b8531adB51C912E4A1dD8be88Ff7254";
+        const contractAddress = "0x4A8F234CC594139D5852e1587d05C613E5d5BddE";
 
         const daoAbi = [
             "function owner() view returns (address)",
@@ -439,7 +445,7 @@
 
             try {
                 const amountInWei = ethers.utils.parseUnits(String(credits), 18);
-                const pricePerCreditWei = ethers.BigNumber.from("1000000000000000");
+                const pricePerCreditWei = ethers.utils.parseEther("0.5");
                 const totalWei = ethers.BigNumber.from(String(credits)).mul(pricePerCreditWei);
 
                 setStatus("comp-status", "Transaction de compensation en cours...", "");
