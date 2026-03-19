@@ -1,10 +1,13 @@
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract EcoCredit is ERC20, Ownable {
-    constructor() ERC20("EcoCredit", "ECO") Ownable(msg.sender) {}
+// --- CONTRAT TOKEN ---
+contract EcoCredit is ERC20, Ownable { //EcoCredit hérite de ERC20 et Ownable (qui sont gérés parr la libr OpenZeppelin) ça donne accès à la méthode OnlyOwner
+    // Le constructeur demande l'adresse de l'owner initial
+    constructor(address initialOwner) ERC20("EcoCredit", "ECO") Ownable(initialOwner) {}
 
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
@@ -15,8 +18,8 @@ contract EcoCredit is ERC20, Ownable {
     }
 }
 
+// --- CONTRAT DAO ---
 contract GreenCompanyDAO is Ownable {
-    
     
     EcoCredit public token; 
     
@@ -24,7 +27,6 @@ contract GreenCompanyDAO is Ownable {
     uint256 public pourcentageBaisse;
     uint256 public anneeActuelle;
     uint256 public actionCount;
-
 
     struct Action {
         uint256 id;
@@ -46,14 +48,15 @@ contract GreenCompanyDAO is Ownable {
     event AnneeCloturee(uint256 nouvelleAnnee, uint256 nouveauQuota);
     event CompensationRealisee(uint256 creditsBrules);
 
+    // Le constructeur de la DAO initialise aussi Ownable
     constructor(uint256 _quotaInitial, uint256 _pourcentageBaisse) Ownable(msg.sender) {
-        token = new EcoCredit();
+        token = new EcoCredit(address(this));
+        
         quotaActuel = _quotaInitial;
         pourcentageBaisse = _pourcentageBaisse;
         anneeActuelle = 1;
         actionCount = 0;
     }
-
 
     modifier onlyEmploye() {
         require(isEmploye[msg.sender], "Access refused : You are not on the whitelist");
@@ -62,7 +65,7 @@ contract GreenCompanyDAO is Ownable {
 
     function ajouterEmploye(address _employe) external onlyOwner {
         require(_employe != address(0), "Error : Invalid address");
-        require(!isEmploye[_employe], "Errorr : Employee already on the whitelistq");
+        require(!isEmploye[_employe], "Error : Employee already on the whitelist");
         isEmploye[_employe] = true;
         emit EmployeAjoute(_employe);
     }
@@ -70,7 +73,7 @@ contract GreenCompanyDAO is Ownable {
     function cloturerAnnee() external onlyOwner {
         uint256 new_quota = (quotaActuel * pourcentageBaisse) / 100;
         quotaActuel -= new_quota;
-        anneeActuelle ++;
+        anneeActuelle++;
         emit AnneeCloturee(anneeActuelle, quotaActuel);
     }
 
@@ -115,16 +118,17 @@ contract GreenCompanyDAO is Ownable {
     }
 
     function compenserEmpreinte(address _employe, uint256 _montantCredits) external payable onlyOwner {
-        
-        uint256 prixParCreditEnWei = 1 * 10**15; 
+        uint256 prixParCreditEnWei = 0.5 ether; 
         uint256 coutTotalEnWei = (_montantCredits / 10**18) * prixParCreditEnWei;
 
         require(isEmploye[_employe], "Seller is not an employee");
         require(msg.value >= coutTotalEnWei, "ETH sold insuffisant");
         require(token.balanceOf(_employe) >= _montantCredits, "Employee has not enough CarbonCredit");
 
+        // Destruction des jetons avant l'envoi des fonds (prévention de réentrance basique)
         token.burn(_employe, _montantCredits);
 
+        // Paiement de l'employé
         (bool success, ) = payable(_employe).call{value: coutTotalEnWei}("");
         require(success, "Error : transaction has failed");
 
