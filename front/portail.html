@@ -191,6 +191,10 @@
             object-fit: contain;
         }
 
+        .brand-home {
+            display: block;
+        }
+
         .wallet {
             font-family: var(--font-ui);
             background: #eff7f0;
@@ -580,6 +584,90 @@
             display: flex;
         }
 
+        .reward-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(16, 30, 19, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1200;
+            backdrop-filter: blur(5px);
+        }
+
+        .reward-overlay.open {
+            display: flex;
+        }
+
+        .reward-modal {
+            width: 100%;
+            max-width: 560px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: 0 30px 64px rgba(19, 54, 28, 0.25);
+            padding: 26px;
+            text-align: center;
+            animation: modalIn 0.26s ease;
+        }
+
+        .reward-token-wrap {
+            margin: 2px auto 14px;
+            width: 98px;
+            height: 98px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, #f3fff6 0%, #e2f4e6 65%);
+            border: 1px solid #cfe5d4;
+            box-shadow: inset 0 2px 10px rgba(255, 255, 255, 0.8), 0 14px 30px rgba(31, 143, 74, 0.14);
+        }
+
+        .reward-token {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            animation: rewardSpin 2.7s linear infinite;
+            filter: drop-shadow(0 10px 16px rgba(31, 143, 74, 0.22));
+        }
+
+        .reward-title {
+            margin: 0;
+            font-family: var(--font-logo);
+            font-size: 1.6rem;
+            letter-spacing: -0.03em;
+        }
+
+        .reward-text {
+            margin: 10px 0 0;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .reward-count {
+            margin: 12px 0 0;
+            font-family: var(--font-logo);
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 800;
+            color: var(--green);
+            letter-spacing: -0.03em;
+        }
+
+        .reward-action-id {
+            margin-top: 8px;
+            color: #2e4732;
+            font-size: 0.94rem;
+            font-weight: 700;
+        }
+
+        @keyframes rewardSpin {
+            from { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.08); }
+            to { transform: rotate(360deg) scale(1); }
+        }
+
         .profile-modal {
             width: 100%;
             max-width: 520px;
@@ -699,9 +787,27 @@
             border-radius: 999px;
             font-size: 0.78rem;
             margin-left: 6px;
-            border: 1px solid #cee3cf;
-            background: #f2fbf3;
-            color: #1b6b38;
+            border: 1px solid #d9e5db;
+            background: #f4faf5;
+            color: #3e5642;
+        }
+
+        .pill.status-valid {
+            border-color: #cde7d3;
+            background: #effaf1;
+            color: var(--green);
+        }
+
+        .pill.status-rejected {
+            border-color: #f0d1d1;
+            background: #fff3f3;
+            color: var(--danger);
+        }
+
+        .pill.status-pending {
+            border-color: #f2d6b6;
+            background: #fff6eb;
+            color: #c97817;
         }
 
         @media (max-width: 930px) {
@@ -743,7 +849,9 @@
     <main id="app">
         <header class="topbar">
             <div class="brand">
-                <img class="brand-logo" src="assets/Logo_baniere.png" alt="Logo du projet">
+                <a class="brand-home" href="index.html" aria-label="Retour à l'accueil">
+                    <img class="brand-logo" src="assets/Logo_baniere.png" alt="Logo du projet">
+                </a>
                 <span>Portail Employé</span>
             </div>
             <div style="display:flex; gap:10px; align-items:center;">
@@ -754,19 +862,19 @@
 
         <section class="layout">
             <article class="card">
-                <h2>Vue d’ensemble DAO</h2>
+                <h2>Mon tableau employé</h2>
                 <div class="stats">
                     <div class="stat">
-                        <div class="label">Année actuelle</div>
-                        <div id="year-value" class="value">-</div>
+                        <div class="label">Mes actions soumises</div>
+                        <div id="submitted-value" class="value">-</div>
                     </div>
                     <div class="stat">
-                        <div class="label">Quota carbone</div>
-                        <div class="value token-inline"><img class="token-mark lg" src="assets/CreditCarbone.png" alt="CreditCarbone"><span id="quota-value">-</span></div>
+                        <div class="label">Mes actions validées</div>
+                        <div id="validated-value" class="value">-</div>
                     </div>
                     <div class="stat">
-                        <div class="label">Actions soumises</div>
-                        <div id="actions-count-value" class="value">-</div>
+                        <div class="label">Mes votes participés</div>
+                        <div id="votes-value" class="value">-</div>
                     </div>
                     <div class="stat">
                         <div class="label">Mes crédits ECO</div>
@@ -836,8 +944,21 @@
         </div>
     </div>
 
+    <div id="reward-overlay" class="reward-overlay" aria-hidden="true">
+        <div class="reward-modal" role="dialog" aria-modal="true" aria-labelledby="reward-title">
+            <div class="reward-token-wrap">
+                <img class="reward-token" src="assets/CreditCarbone.png" alt="Crédit ECO">
+            </div>
+            <h2 id="reward-title" class="reward-title">Bravo !</h2>
+            <p class="reward-text">Vous avez gagné des crédits ECO grâce à une action validée.</p>
+            <div id="reward-count" class="reward-count">+0 ECO</div>
+            <div id="reward-action-id" class="reward-action-id">Action #—</div>
+            <button class="btn" style="margin-top:16px; width:auto;" onclick="closeRewardModal()">Accéder à mon portail</button>
+        </div>
+    </div>
+
     <script>
-        const contractAddress = "0xA9f004584b8531adB51C912E4A1dD8be88Ff7254";
+        const contractAddress = "0x4A8F234CC594139D5852e1587d05C613E5d5BddE";
 
         const daoAbi = [
             "function owner() view returns (address)",
@@ -862,6 +983,11 @@
         let token;
         let userAddress;
         let cachedProfileStats = null;
+        let previousEcoBalance = null;
+        let refreshIntervalId = null;
+        let rewardQueue = [];
+        let rewardIsOpen = false;
+        const DEFAULT_ACTION_REWARD_ECO = 10;
 
         function voteStorageKey(actionId) {
             return `green-vote:${contractAddress}:${userAddress || "anonymous"}:${actionId}`;
@@ -877,6 +1003,18 @@
 
         function firstSeenStorageKey(actionId) {
             return `green-action-first-seen:${contractAddress}:${actionId}`;
+        }
+
+        function rewardStorageKey(actionId) {
+            return `green-reward-shown:${contractAddress}:${userAddress || "anonymous"}:${actionId}`;
+        }
+
+        function hasRewardBeenShown(actionId) {
+            return localStorage.getItem(rewardStorageKey(actionId)) === "1";
+        }
+
+        function markRewardShown(actionId) {
+            localStorage.setItem(rewardStorageKey(actionId), "1");
         }
 
         function getOrCreateFirstSeen(actionId) {
@@ -941,6 +1079,59 @@
             document.getElementById("profile-balance-text").textContent = value;
         }
 
+        function formatEcoValue(value) {
+            const rounded = Math.round(value * 10000) / 10000;
+            return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+        }
+
+        function animateEcoGain(targetGain) {
+            const countNode = document.getElementById("reward-count");
+            const duration = 1200;
+            const start = performance.now();
+
+            function frame(now) {
+                const progress = Math.min(1, (now - start) / duration);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = targetGain * eased;
+                countNode.textContent = `+${formatEcoValue(current)} ECO`;
+                if (progress < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    countNode.textContent = `+${formatEcoValue(targetGain)} ECO`;
+                }
+            }
+
+            requestAnimationFrame(frame);
+        }
+
+        function openRewardModal(gain, actionId) {
+            const overlay = document.getElementById("reward-overlay");
+            const textNode = overlay.querySelector(".reward-text");
+            document.getElementById("reward-action-id").textContent = `Action #${actionId}`;
+            textNode.textContent = `Bravo ! Vous avez gagné ${formatEcoValue(gain)} ECO grâce à l'action #${actionId}.`;
+            overlay.classList.add("open");
+            rewardIsOpen = true;
+            animateEcoGain(gain);
+        }
+
+        function flushRewardQueue() {
+            if (rewardIsOpen || rewardQueue.length === 0) return;
+            const reward = rewardQueue.shift();
+            openRewardModal(reward.gain, reward.actionId);
+        }
+
+        function closeRewardModal() {
+            document.getElementById("reward-overlay").classList.remove("open");
+            rewardIsOpen = false;
+            flushRewardQueue();
+        }
+
+        function enqueueReward(gain, actionId) {
+            if (gain <= 0 || !actionId) return;
+            rewardQueue.push({ gain, actionId });
+            flushRewardQueue();
+        }
+
         async function connect() {
             if (!window.ethereum) {
                 setStatus("login-status", "MetaMask non détecté.", "error");
@@ -980,6 +1171,14 @@
                 document.getElementById("app").style.display = "block";
 
                 await refreshAll();
+
+                if (refreshIntervalId) {
+                    clearInterval(refreshIntervalId);
+                }
+                refreshIntervalId = setInterval(async () => {
+                    if (!dao || !token || !userAddress) return;
+                    await refreshAll();
+                }, 15000);
             } catch (error) {
                 setStatus("login-status", "Connexion annulée ou configuration invalide.", "error");
                 console.error(error);
@@ -989,19 +1188,49 @@
         async function refreshAll() {
             if (!dao || !token) return;
             try {
-                const [year, quota, count, employee, rawBalance] = await Promise.all([
-                    dao.anneeActuelle(),
-                    dao.quotaActuel(),
+                const [count, employee, rawBalance] = await Promise.all([
                     dao.actionCount(),
                     dao.isEmploye(userAddress),
                     token.balanceOf(userAddress)
                 ]);
 
-                document.getElementById("year-value").textContent = year.toString();
-                document.getElementById("quota-value").textContent = quota.toString();
-                document.getElementById("actions-count-value").textContent = count.toString();
-                document.getElementById("eco-balance-value").textContent = ethers.utils.formatUnits(rawBalance, 18);
+                const currentBalance = Number(ethers.utils.formatUnits(rawBalance, 18));
+                const profileStats = await computeProfileStats();
+
+                document.getElementById("submitted-value").textContent = String(profileStats?.submitted ?? "-");
+                document.getElementById("validated-value").textContent = String(profileStats?.validated ?? "-");
+                document.getElementById("votes-value").textContent = String(profileStats?.votes ?? "-");
+                document.getElementById("eco-balance-value").textContent = formatEcoValue(currentBalance);
                 setStatus("employee-tag", employee ? "Tu es whitelisté en tant qu’employé." : "Tu n’es pas whitelisté. Contacte l’owner.", employee ? "success" : "error");
+
+                if (previousEcoBalance === null) {
+                    const unseenValidated = (profileStats?.validatedActionIds || [])
+                        .filter((actionId) => !hasRewardBeenShown(actionId))
+                        .sort((a, b) => a - b);
+
+                    unseenValidated.forEach((actionId) => {
+                        markRewardShown(actionId);
+                        enqueueReward(DEFAULT_ACTION_REWARD_ECO, actionId);
+                    });
+
+                    previousEcoBalance = currentBalance;
+                } else if (currentBalance > previousEcoBalance) {
+                    const newValidated = (profileStats?.validatedActionIds || [])
+                        .filter((actionId) => !hasRewardBeenShown(actionId))
+                        .sort((a, b) => b - a);
+
+                    if (newValidated.length > 0) {
+                        newValidated.forEach((actionId) => {
+                            markRewardShown(actionId);
+                            enqueueReward(DEFAULT_ACTION_REWARD_ECO, actionId);
+                        });
+                    }
+
+                    previousEcoBalance = currentBalance;
+                } else {
+                    previousEcoBalance = currentBalance;
+                }
+
                 cachedProfileStats = null;
 
                 await loadActions(Number(count));
@@ -1040,6 +1269,10 @@
                     const downClass = storedChoice === "contre" ? "is-down" : "";
                     const disabledAttr = hasVoted || action.estValidee ? "disabled" : "";
 
+                    const isRejected = !action.estValidee && Number(action.votesContre) >= 3;
+                    const statusLabel = action.estValidee ? "Validée" : isRejected ? "Rejetée" : "En cours";
+                    const statusClass = action.estValidee ? "status-valid" : isRejected ? "status-rejected" : "status-pending";
+
                     const html = `
                         <div class="action-item">
                             <div class="action-head">
@@ -1048,7 +1281,7 @@
                                     <div class="action-title-wrap">
                                         <div class="action-title-row">
                                             <strong>Action #${action.id.toString()}</strong>
-                                            <span class="pill">${action.estValidee ? "Validée" : "En cours"}</span>
+                                            <span class="pill ${statusClass}">${statusLabel}</span>
                                         </div>
                                         <div class="action-date">${relativeTime}</div>
                                     </div>
@@ -1161,6 +1394,9 @@
                 submitted,
                 validated,
                 votes,
+                validatedActionIds: actionsData
+                    .filter((action) => action.auteur.toLowerCase() === userAddress.toLowerCase() && action.estValidee)
+                    .map((action) => Number(action.id.toString())),
                 isEmployee,
                 balance: ethers.utils.formatUnits(balanceBn, 18)
             };
@@ -1252,11 +1488,20 @@
             token = null;
             userAddress = null;
             cachedProfileStats = null;
+            previousEcoBalance = null;
+            rewardQueue = [];
+            rewardIsOpen = false;
+
+            if (refreshIntervalId) {
+                clearInterval(refreshIntervalId);
+                refreshIntervalId = null;
+            }
 
             document.getElementById("app").style.display = "none";
             document.getElementById("denied-screen").style.display = "none";
             document.getElementById("login-screen").style.display = "flex";
             document.getElementById("profile-overlay").classList.remove("open");
+            document.getElementById("reward-overlay").classList.remove("open");
             setStatus("login-status", "Déconnecté.", "");
         }
     </script>
