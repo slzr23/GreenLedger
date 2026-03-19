@@ -110,6 +110,25 @@ GreenLedger/
 5. Si l’action atteint le seuil, l’auteur reçoit des `ECO`.
 6. L’owner peut racheter et brûler des crédits pour compenser l’empreinte.
 
+## Sécurité et Gestion des Risques
+
+La sécurité de la plateforme repose sur une architecture de Smart Contracts conçue pour limiter les comportements malveillants tout en garantissant la transparence des actions écologiques. Le système actuel intègre plusieurs barrières de protection, mais présente également des limites inhérentes à son statut de Proof of Concept (PoC).
+
+**Mesures de sécurité implémentées (Ce que propose notre système)**
+
+* **Contrôle d'accès strict (OpenZeppelin) :** L'utilisation du standard `Ownable` garantit que seules les adresses autorisées peuvent exécuter des fonctions critiques. Le jeton `EcoCredit` est strictement possédé par le contrat `GreenCompanyDAO`. Personne, pas même l'administrateur, ne peut "minter" des jetons directement depuis son portefeuille ; seule la logique du contrat peut le faire suite à un vote légitime.
+* **Système de Liste Blanche (Whitelist) :** Le modificateur `onlyEmploye` empêche toute adresse externe d'interagir avec la DAO. Seuls les employés préalablement enregistrés par l'entreprise peuvent soumettre des actions ou voter.
+* **Protection contre la fraude au vote :** Le contrat utilise un mapping complexe (`aVote`) pour s'assurer qu'un employé ne peut voter qu'une seule fois par action. De plus, une fois le seuil de validation atteint, l'état de l'action est verrouillé (`estValidee = true`), empêchant toute distribution multiple de récompenses pour une même action (double-mint).
+* **Sécurisation des flux financiers (ETH) :** Lors de la compensation monétaire, le contrat respecte nativement le design pattern "Checks-Effects-Interactions". Il vérifie les soldes, détruit les jetons (`burn`), puis seulement après, transfère les fonds. Le système intègre également un calcul exact de la monnaie (refund) pour éviter que des Ethers ne restent bloqués indéfiniment dans le contrat.
+
+**Limites actuelles et failles potentielles (Axes d'amélioration)**
+
+Bien que le flux principal soit sécurisé, un déploiement sur le réseau principal (Mainnet) nécessiterait de pallier les vulnérabilités suivantes :
+
+* **Centralisation (Risque du point de défaillance unique) :** Actuellement, le compte administrateur possède les pleins pouvoirs. Si la clé privée de l'admin est compromise, un attaquant pourrait ajouter de faux employés pour manipuler les votes, ou vider les fonds destinés à la compensation. *Solution prévue : Remplacer l'admin unique par un portefeuille multisignature (ex: Gnosis Safe) nécessitant l'accord de plusieurs directeurs.*
+* **Risque de collusion (Seuils codés en dur) :** Le seuil de validation est fixé à 3 votes. Si l'entreprise grandit et compte 500 employés, un groupe de 3 personnes malveillantes pourrait s'entendre pour valider de fausses preuves et générer des jetons à l'infini. *Solution prévue : Remplacer le seuil fixe par un quorum dynamique (ex: nécessiter le vote favorable de 10 % des employés inscrits).*
+* **Risque théorique de Réentrance :** Bien que l'ordre des instructions dans la fonction `compenserEmpreinte` protège globalement contre les attaques par réentrance, l'utilisation de `.call{value: ...}("")` sans garde explicite reste une pratique auditable. *Solution prévue : Implémenter le modificateur `nonReentrant` (ReentrancyGuard d'OpenZeppelin) sur toutes les fonctions manipulant de l'Ether.*
+
 ## Remarques
 
 - Les montants de token sont exprimés en base `18 decimals` côté contrat.
