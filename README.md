@@ -6,8 +6,8 @@ Plateforme de suivi d’actions écologiques en entreprise, avec gouvernance int
 
 ## Aperçu
 
-![Interface](https://discordapp.com/channels/@me/1473616005921116182/1484149072955707424)
-![Interface](https://discordapp.com/channels/@me/1473616005921116182/1484149090836283414)
+![Interface](https://cdn.discordapp.com/attachments/1473616005921116182/1484149072767090698/image.png?ex=69bd2d09&is=69bbdb89&hm=3809b8057449bd790b619ab653828e00242d0697e162ac683981ff011ff719e2)
+![Interface mobile](https://cdn.discordapp.com/attachments/1473616005921116182/1484149090760523997/image1.png?ex=69bd2d0d&is=69bbdb8d&hm=8e90b2423c16a9cd97c6d6050292230dd25003787bf7888e956f461058ff3ade)
 
 
 
